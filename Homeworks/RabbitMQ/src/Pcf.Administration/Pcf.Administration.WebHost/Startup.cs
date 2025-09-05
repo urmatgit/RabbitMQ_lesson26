@@ -57,7 +57,7 @@ namespace Pcf.Administration.WebHost
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     RabbitHelpers.ConfigureRmq(cfg, Configuration);
-                    RabbitHelpers.RegisterEndPoints(cfg);
+                    RabbitHelpers.RegisterEndPoints< EventAdminConsumer>(cfg);
                 });
             });
             services.AddHostedService<MasstransitService>();
