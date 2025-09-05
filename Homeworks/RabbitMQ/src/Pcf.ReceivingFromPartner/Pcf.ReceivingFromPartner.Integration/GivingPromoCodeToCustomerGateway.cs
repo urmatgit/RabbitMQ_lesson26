@@ -1,19 +1,23 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using Pcf.ReceivingFromPartner.Integration.Dto;
+﻿using MassTransit;
+using Pcf.Administration.Core.Domain;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Gateways;
 using Pcf.ReceivingFromPartner.Core.Domain;
+using Pcf.ReceivingFromPartner.Integration.Dto;
+using Pcf.Shared.Models;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Pcf.ReceivingFromPartner.Integration
 {
     public class GivingPromoCodeToCustomerGateway
         : IGivingPromoCodeToCustomerGateway
     {
-        private readonly HttpClient _httpClient;
-
-        public GivingPromoCodeToCustomerGateway(HttpClient httpClient)
+        //private readonly HttpClient _httpClient;
+        private readonly IBusControl _busControl;
+        public GivingPromoCodeToCustomerGateway(IBusControl busControl)
         {
-            _httpClient = httpClient;
+           // _httpClient = httpClient;
+            _busControl = busControl;
         }
 
         public async Task GivePromoCodeToCustomer(PromoCode promoCode)
@@ -29,9 +33,10 @@ namespace Pcf.ReceivingFromPartner.Integration
                 PartnerManagerId = promoCode.PartnerManagerId
             };
 
-            var response = await _httpClient.PostAsJsonAsync("api/v1/promocodes", dto);
+            //            var response = await _httpClient.PostAsJsonAsync("api/v1/promocodes", dto);
 
-            response.EnsureSuccessStatusCode();
+            await _busControl.Publish(new MessageDto { Content = dto });
+           
         }
     }
 }

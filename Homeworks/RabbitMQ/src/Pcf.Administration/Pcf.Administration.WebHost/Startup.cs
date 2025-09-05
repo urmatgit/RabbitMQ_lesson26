@@ -1,15 +1,21 @@
+using Castle.Core.Configuration;
+using MassTransit;
+using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Configuration;
-using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
-using Pcf.Administration.DataAccess;
-using Pcf.Administration.DataAccess.Repositories;
-using Pcf.Administration.DataAccess.Data;
 using Pcf.Administration.Core.Abstractions.Repositories;
+using Pcf.Administration.DataAccess;
+using Pcf.Administration.DataAccess.Data;
+using Pcf.Administration.DataAccess.Repositories;
+using Pcf.Administration.WebHost.Consumers;
+using Pcf.Shared.Helpers;
+using Pcf.Shared.Services;
 using System;
+using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
 namespace Pcf.Administration.WebHost
 {
@@ -45,8 +51,18 @@ namespace Pcf.Administration.WebHost
                 options.Title = "PromoCode Factory Administration API Doc";
                 options.Version = "1.0";
             });
+            services.AddMassTransit(x =>
+            {
+                x.AddConsumer<EventAdminConsumer>();
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    RabbitHelpers.ConfigureRmq(cfg, Configuration);
+                    RabbitHelpers.RegisterEndPoints(cfg);
+                });
+            });
+            services.AddHostedService<MasstransitService>();
         }
-
+         
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IDbInitializer dbInitializer)
         {

@@ -12,6 +12,11 @@ using Pcf.ReceivingFromPartner.DataAccess;
 using Pcf.ReceivingFromPartner.DataAccess.Repositories;
 using Pcf.ReceivingFromPartner.DataAccess.Data;
 using Pcf.ReceivingFromPartner.Integration;
+using MassTransit;
+using MassTransit.RabbitMqTransport;
+
+using Pcf.Shared.Settings;
+using Pcf.Shared.Helpers;
 
 namespace Pcf.ReceivingFromPartner.WebHost
 {
@@ -59,6 +64,12 @@ namespace Pcf.ReceivingFromPartner.WebHost
                 options.Title = "PromoCode Factory Receiving From Partner API Doc";
                 options.Version = "1.0";
             });
+            services.AddMassTransit(x => {
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                   RabbitHelpers.ConfigureRmq(cfg, Configuration);
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -90,5 +101,6 @@ namespace Pcf.ReceivingFromPartner.WebHost
 
             dbInitializer.InitializeDb();
         }
+        
     }
 }
